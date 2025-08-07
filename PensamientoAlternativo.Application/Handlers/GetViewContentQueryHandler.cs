@@ -3,6 +3,7 @@ using MediatR;
 using PensamientoAlternativo.Application.DTOs;
 using PensamientoAlternativo.Application.Querys;
 using PensamientoAlternativo.Domain.Interfaces;
+using PensamientoAlternativo.Domain.Constantes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,9 +23,16 @@ namespace PensamientoAlternativo.Application.Handlers
 
         public async Task<ViewContentDto> Handle(GetViewContentQuery request, CancellationToken ct)
         {
-            if (!string.Equals(request.View, "Home", StringComparison.OrdinalIgnoreCase))
-                throw new NotImplementedException("Vista no soportada aún");
+            return request.View switch
+            {
+                SupportedViews.Home => await GetHomeView(request, ct),
+                _ => throw new NotImplementedException($"Vista '{request.View}' no está soportada.")
+            };
 
+        }
+
+        private async Task<ViewContentDto> GetHomeView(GetViewContentQuery request, CancellationToken ct)
+        {
             return new ViewContentDto
             {
                 View = request.View,
@@ -36,11 +44,17 @@ namespace PensamientoAlternativo.Application.Handlers
                         Section = "Home Banner principal",
                         Content = await _repo.GetBannersAsync(ct)
                     },
+                    //new()
+                    //{
+                    //    IdSection = 2,
+                    //    Section = "Home Services",
+                    //    Content = await _repo.GetServicesAsync(ct)
+                    //},
                     new()
                     {
                         IdSection = 2,
-                        Section = "Home Services",
-                        Content = await _repo.GetServicesAsync(ct)
+                        Section = "Home Rompe Tus Limites Fotos",
+                        Content = await _repo.GetImagesAsync(ct)
                     },
                     new()
                     {
@@ -66,9 +80,10 @@ namespace PensamientoAlternativo.Application.Handlers
                         Section = "Home Top Question Answer",
                         Content = await _repo.GetFaqsAsync(ct)
                     }
+
                 }
             };
-
-        }
+        }    
     }
 }
+

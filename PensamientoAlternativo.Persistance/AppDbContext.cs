@@ -46,8 +46,10 @@ namespace PensamientoAlternativo.Persistance
                 .HasForeignKey(f => f.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Image>().Property(x => x.IsBannerImage).IsRequired();
             modelBuilder.Entity<Image>().Property(x => x.Title).IsRequired();
             modelBuilder.Entity<Image>().Property(x => x.Path).IsRequired();
+            modelBuilder.Entity<Image>().Property(x => x.Description).IsRequired();
 
             modelBuilder.Entity<Service>().Property(x => x.IconName).IsRequired();
             modelBuilder.Entity<Service>().Property(x => x.IconPath).IsRequired();
