@@ -53,6 +53,7 @@ namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
             Image image = new (
                 isBannerImage: req.IsBannerImage,
                 isVisible: req.IsVisible,
+                viewSection: req.ViewSection,
                 title: req.Title?.Trim() ?? string.Empty,
                 path: publicUrl,
                 description: req.Description?.Trim() ?? string.Empty

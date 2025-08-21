@@ -68,6 +68,7 @@ namespace API_PensamientoAlternativo.Controllers
             var id = await _mediator.Send(new CreateImageCommand(
                 form.IsBannerImage,
                 form.IsActive,
+                form.ViewSection,
                 form.Title,
                 form.Description,
                 stream,

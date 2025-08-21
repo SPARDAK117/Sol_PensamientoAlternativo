@@ -46,6 +46,7 @@ namespace API_PensamientoAlternativo.Controllers
                 form.Title,
                 form.Description,
                 form.IsVisible,
+                form.ViewSection,
                 stream,
                 form.File.ContentType,
                 form.File.FileName

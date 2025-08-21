@@ -42,7 +42,8 @@ namespace PensamientoAlternativo.Application.Handlers.VideoHandlers
                 title: req.Title.Trim(),
                 description: req.Description.Trim(),
                 url: publicUrl,
-                isVisible: req.IsVisible
+                isVisible: req.IsVisible,
+                viewSection: req.viewSection
             );
 
             return await _repo.CreateAsync(video, ct);

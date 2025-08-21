@@ -16,6 +16,9 @@ namespace PensamientoAlternativo.Domain.Interfaces
         Task<List<Article>> GetArticlesAsync(CancellationToken ct);
         Task<List<Opinion>> GetOpinionsAsync(CancellationToken ct);
         Task<List<Faq>> GetFaqsAsync(CancellationToken ct);
+        Task<List<Image>> GetImagesBreakYourLimitsAsync(CancellationToken ct);
+        Task<List<Video>> GetVideosBreakYourLimitsAsync(CancellationToken ct);
+
     }
 
 }

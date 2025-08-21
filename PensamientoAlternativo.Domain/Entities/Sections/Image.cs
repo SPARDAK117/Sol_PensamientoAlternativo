@@ -16,10 +16,11 @@ namespace PensamientoAlternativo.Domain.Entities.Sections
         public string Path { get; private set; } = string.Empty;
         public string Description { get; private set; } = string.Empty;
 
-        public Image(bool isBannerImage, bool isVisible, string title, string path, string description)
+        public Image(bool isBannerImage, bool isVisible,int viewSection, string title, string path, string description)
         {
             IsBannerImage = isBannerImage;
             IsVisible = isVisible;
+            ViewSection = viewSection;
             Title = title ?? string.Empty;
             Path = path ?? string.Empty;
             Description = description ?? string.Empty;

@@ -11,6 +11,7 @@ namespace PensamientoAlternativo.Application.DTOs.VideoDTOs
     {
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public int ViewSection { get; set; }
         public bool IsVisible { get; set; } = true;
         public IFormFile File { get; set; } = default!;
     }

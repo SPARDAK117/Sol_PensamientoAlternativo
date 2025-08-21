@@ -11,6 +11,7 @@ namespace PensamientoAlternativo.Application.Commands.VideoCommands
         string Title,
         string Description,
         bool IsVisible,
+        int viewSection,
         Stream Content,
         string ContentType,
         string OriginalFileName

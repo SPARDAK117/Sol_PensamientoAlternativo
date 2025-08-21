@@ -22,7 +22,11 @@ namespace API_PensamientoAlternativo.Controllers
         public async Task<IActionResult> GetViewData(string view)
         {
             Object result;
-
+            if (view == "RompeTusLimites")
+            {
+                result = await _mediator.Send(new GetBreakYourLimitsViewQuery(view));
+                return Ok(result);
+            }
             if (view == "Blog")
             {
                 result = await _mediator.Send(new GetBlogViewQuery());

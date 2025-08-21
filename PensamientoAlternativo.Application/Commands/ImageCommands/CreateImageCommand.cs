@@ -10,6 +10,7 @@ namespace PensamientoAlternativo.Application.Commands.ImageCommands
     public sealed record CreateImageCommand(
         bool IsBannerImage,
         bool IsVisible,
+        int ViewSection,
         string Title,
         string Description,
         Stream Content,
