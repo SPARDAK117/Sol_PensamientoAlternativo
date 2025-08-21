@@ -1,6 +1,7 @@
 ﻿using API_PensamientoAlternativo.DTOs.ContactFormDTOs;
 using MediatR;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PensamientoAlternativo.Application.Commands.FormCommand;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace API_PensamientoAlternativo.Controllers
 {
+    [EnableCors("CorsPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class ContactController : ControllerBase

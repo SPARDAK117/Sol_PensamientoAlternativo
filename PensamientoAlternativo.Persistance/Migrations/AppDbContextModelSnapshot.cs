@@ -178,6 +178,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Question")
                         .IsRequired()
                         .HasColumnType("text");
@@ -202,6 +205,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
                     b.Property<bool>("IsBannerImage")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Path")
                         .IsRequired()
                         .HasColumnType("text");
@@ -209,6 +215,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("ViewSection")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -229,6 +238,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("OpinionText")
                         .IsRequired()
@@ -282,6 +294,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Title")
                         .IsRequired()

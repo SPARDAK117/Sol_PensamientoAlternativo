@@ -19,6 +19,7 @@ namespace PensamientoAlternativo.Domain.Entities.Blog
         {
             Name = name;
         }
+        public void Rename(string name) => Name = (name ?? "").Trim();
     }
 
 }

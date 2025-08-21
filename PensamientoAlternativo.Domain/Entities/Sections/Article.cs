@@ -32,6 +32,19 @@ namespace PensamientoAlternativo.Domain.Entities.Sections
             AuthorName = "Pensamiento Alternativo";
             CategoryId = categoryId;
         }
+
+        public void SetContentHtml(string html)
+        {
+            ContentHtml = html ?? string.Empty;
+        }
+
+        public void UpdateBasics(string? title, string? description, string? imageUrl, int? categoryId)
+        {
+            if (title != null) Title = title.Trim();
+            if (description != null) Description = description.Trim();
+            if (imageUrl != null) ImageUrl = imageUrl.Trim();
+            if (categoryId.HasValue) CategoryId = categoryId.Value;
+        }
     }
 
 

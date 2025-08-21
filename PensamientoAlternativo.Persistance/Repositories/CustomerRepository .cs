@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PensamientoAlternativo.Domain.Entities;
 using PensamientoAlternativo.Domain.Interfaces;
-using PensamientoAlternativo.Persistance;
 
-namespace PensamientoAlternativo.Infrastructure.Repositories;
+namespace PensamientoAlternativo.Persistance.Repositories;
 
 public class CustomerRepository : Repository<Customer>, ICustomerRepository
 {

@@ -18,7 +18,7 @@ namespace PensamientoAlternativo.Persistance.Repositories
             _context = context;
         }
 
-        public Task<List<Image>> GetBannersAsync(CancellationToken ct) => _context.Images.Where(img => img.IsBannerImage).ToListAsync(ct);
+        public Task<List<Image>> GetBannersAsync(CancellationToken ct) => _context.Images.Where(img => img.IsBannerImage && img.IsVisible).ToListAsync(ct);
         public Task<List<Service>> GetServicesAsync(CancellationToken ct) => _context.Services.ToListAsync(ct);
         public Task<List<Video>> GetVideosAsync(CancellationToken ct) => _context.Videos.ToListAsync(ct);
         public Task<List<Image>> GetImagesAsync(CancellationToken ct) => _context.Images.Where(img => !img.IsBannerImage).ToListAsync(ct);

@@ -1,30 +1,73 @@
 ﻿using Domain.Seedwork;
 using Microsoft.EntityFrameworkCore;
 using PensamientoAlternativo.Application.Commands.FormCommand;
+using PensamientoAlternativo.Application.DTOs.CategoriesDTOs;
+using PensamientoAlternativo.Application.Handlers.CategoriesHandler;
+using PensamientoAlternativo.Application.Handlers.FaqHandlers;
+using PensamientoAlternativo.Application.Handlers.ImageHandlers;
+using PensamientoAlternativo.Application.Handlers.OpinionsHandlers;
+using PensamientoAlternativo.Application.Handlers.VideoHandlers;
 using PensamientoAlternativo.Application.Interfaces;
 using PensamientoAlternativo.Domain.Interfaces;
 using PensamientoAlternativo.Infrastructure;
-using PensamientoAlternativo.Infrastructure.Repositories;
 using PensamientoAlternativo.Infrastructure.Services;
+using PensamientoAlternativo.Infrastructure.Storage;
 using PensamientoAlternativo.Persistance;
 using PensamientoAlternativo.Persistance.Repositories;
 
 namespace API_PensamientoAlternativo
 {
-    public static class Program 
+    public static class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                     ?? Array.Empty<string>();
+
+
+
+
             builder.Services.AddControllers();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy
+                        .WithOrigins(allowedOrigins)              // <-- usa orígenes explícitos
+                        .SetIsOriginAllowedToAllowWildcardSubdomains() // opcional *.midominio.com
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .WithExposedHeaders("Content-Disposition") // si descargas archivos
+                        .AllowCredentials();                        // <-- si usas cookies/JWT en fetch
+                });
+
+                // Política abierta SOLO para DEV (no usar en prod si hay credenciales)
+                options.AddPolicy("DevOpen", policy =>
+                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            });
+
+
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddMediatR(cfg =>
                 cfg.RegisterServicesFromAssembly(typeof(SubmitContactFormCommand).Assembly));
-
+            builder.Services.AddMediatR(cfg =>
+                 cfg.RegisterServicesFromAssemblyContaining<CreateImageHandler>());
+            builder.Services.AddMediatR(cfg =>
+                cfg.RegisterServicesFromAssemblyContaining<CreateFaqHandler>());
+            builder.Services.AddMediatR(cfg =>
+                cfg.RegisterServicesFromAssemblyContaining<CreateOpinionHandler>());
+            builder.Services.AddMediatR(cfg =>
+                cfg.RegisterServicesFromAssemblyContaining<CreateBlogCategoryHandler>());
+            builder.Services.AddMediatR(cfg =>
+                cfg.RegisterServicesFromAssemblyContaining<CreateVideoHandler>());
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
+
 
 
             builder.Services.AddScoped<IContactFormRepository, ContactFormRepository>();
@@ -32,21 +75,31 @@ namespace API_PensamientoAlternativo
             builder.Services.AddScoped<IClientSettingsRepository, ClientSettingsRepository>();
             builder.Services.AddScoped<IHomeContentRepository, HomeContentRepository>();
             builder.Services.AddScoped<IBlogRepository, BlogRepository>();
-
+            builder.Services.AddScoped<IArticleWriteRepository, ArticleWriteRepository>();
+            builder.Services.AddScoped<IImageWriteRepository, ImageWriteRepository>();
+            builder.Services.AddScoped<IFaqWriteRepository, FaqWriteRepository>();
+            builder.Services.AddScoped<IOpinionWriteRepository, OpinionWriteRepository>();
+            builder.Services.AddScoped<IBlogCategoryWriteRepository, BlogCategoryWriteRepository>();
+            builder.Services.AddScoped<IVideoWriteRepository, VideoWriteRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-
+            builder.Services.AddScoped<IImageStorage, FirebaseImageStorage>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
             var app = builder.Build();
 
+            app.UseRouting();
             if (app.Environment.IsDevelopment())
             {
+                app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseCors("DevOpen");
             }
+            else
+                app.UseCors("CorsPolicy");
 
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

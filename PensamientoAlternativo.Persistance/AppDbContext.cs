@@ -16,13 +16,11 @@ namespace PensamientoAlternativo.Persistance
         public DbSet<ClientSettings> ClientSettings => Set<ClientSettings>();
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<ContactForm> ContactForms => Set<ContactForm>();
-
         public DbSet<Image> Images => Set<Image>();
         public DbSet<Service> Services => Set<Service>();
         public DbSet<Video> Videos => Set<Video>();
         public DbSet<Opinion> Opinions => Set<Opinion>();
         public DbSet<Faq> Faqs => Set<Faq>();
-
         public DbSet<Article> Articles => Set<Article>();
         public DbSet<BlogCategory> BlogCategories => Set<BlogCategory>();
 
@@ -47,6 +45,8 @@ namespace PensamientoAlternativo.Persistance
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Image>().Property(x => x.IsBannerImage).IsRequired();
+            modelBuilder.Entity<Image>().Property(x => x.IsVisible).IsRequired();
+            modelBuilder.Entity<Image>().Property(x => x.ViewSection).IsRequired();
             modelBuilder.Entity<Image>().Property(x => x.Title).IsRequired();
             modelBuilder.Entity<Image>().Property(x => x.Path).IsRequired();
             modelBuilder.Entity<Image>().Property(x => x.Description).IsRequired();
@@ -59,13 +59,18 @@ namespace PensamientoAlternativo.Persistance
             modelBuilder.Entity<Video>().Property(x => x.Title).IsRequired();
             modelBuilder.Entity<Video>().Property(x => x.Description).IsRequired();
             modelBuilder.Entity<Video>().Property(x => x.Url).IsRequired();
+            modelBuilder.Entity<Video>().Property(x => x.IsVisible).IsRequired();
+
 
             modelBuilder.Entity<Opinion>().Property(x => x.AuthorName).IsRequired();
             modelBuilder.Entity<Opinion>().Property(x => x.StarRate).IsRequired();
             modelBuilder.Entity<Opinion>().Property(x => x.OpinionText).IsRequired();
+            modelBuilder.Entity<Opinion>().Property(x => x.IsVisible).IsRequired();
 
             modelBuilder.Entity<Faq>().Property(x => x.Question).IsRequired();
             modelBuilder.Entity<Faq>().Property(x => x.Answer).IsRequired();
+            modelBuilder.Entity<Faq>().Property(x => x.IsVisible).IsRequired();
+
 
             modelBuilder.Entity<BlogCategory>(entity =>
             {

@@ -1,9 +1,8 @@
 ﻿using Domain.Seedwork;
 using Microsoft.EntityFrameworkCore;
-using PensamientoAlternativo.Persistance;
 using System.Linq.Expressions;
 
-namespace PensamientoAlternativo.Infrastructure.Repositories;
+namespace PensamientoAlternativo.Persistance.Repositories;
 
 public abstract class Repository<T> : IRepository<T> where T : Entity
 {
@@ -19,9 +18,11 @@ public abstract class Repository<T> : IRepository<T> where T : Entity
         return await _context.Set<T>().FindAsync(id);
     }
 
-    public virtual async Task<IEnumerable<T>> GetAllAsync()
+    public virtual Task<List<T>> GetAllAsync(CancellationToken ct = default)
     {
-        return await _context.Set<T>().ToListAsync();
+        return _context.Set<T>()
+            .AsNoTracking()
+            .ToListAsync(ct);
     }
 
     public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
@@ -43,4 +44,18 @@ public abstract class Repository<T> : IRepository<T> where T : Entity
     {
         await _context.SaveChangesAsync();
     }
+    public virtual Task<List<T>> GetPageAsync(int page, int pageSize, CancellationToken ct = default)
+    {
+        return _context.Set<T>()
+            .AsNoTracking()
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+    }
+
+    public virtual Task<int> CountAsync(CancellationToken ct = default)
+    {
+        return _context.Set<T>().CountAsync(ct);
+    }
+
 }
