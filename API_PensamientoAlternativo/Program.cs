@@ -23,25 +23,14 @@ namespace API_PensamientoAlternativo
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-                     ?? Array.Empty<string>();
-
-
-
+            builder.Services.AddCors(o => o.AddPolicy("AllowAllOrigins", builder =>
+            {
+                builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+            }));
 
             builder.Services.AddControllers();
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("OpenCors", policy =>
-                    policy
-                        .AllowAnyOrigin()      // ⚠️ NO uses AllowCredentials() junto con esto
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .WithExposedHeaders("Content-Disposition")); // si descargas archivos
-            });
-
-
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -80,7 +69,7 @@ namespace API_PensamientoAlternativo
             var app = builder.Build();
 
             app.UseRouting();
-            app.UseCors("OpenCors");
+            app.UseCors("AllowAllOrigins");
 
             if (app.Environment.IsDevelopment())
             {
