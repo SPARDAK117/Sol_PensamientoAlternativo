@@ -33,20 +33,12 @@ namespace API_PensamientoAlternativo
 
             builder.Services.AddCors(options =>
             {
-                //options.AddPolicy("CorsPolicy", policy =>
-                //{
-                //    policy
-                //        .WithOrigins(allowedOrigins)
-                //        .AllowAnyMethod()
-                //        .AllowAnyHeader()
-                //        .WithHeaders("Content-Type", "Authorization", "X-Custom-Header")
-                //        .WithExposedHeaders("Content-Disposition") 
-                //        .AllowCredentials();                       
-                //});
-
-                //// Política abierta SOLO para DEV (no usar en prod si hay credenciales)
-                options.AddPolicy("DevOpen", policy =>
-                    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+                options.AddPolicy("OpenCors", policy =>
+                    policy
+                        .AllowAnyOrigin()      // ⚠️ NO uses AllowCredentials() junto con esto
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .WithExposedHeaders("Content-Disposition")); // si descargas archivos
             });
 
 
@@ -88,15 +80,14 @@ namespace API_PensamientoAlternativo
             var app = builder.Build();
 
             app.UseRouting();
+            app.UseCors("OpenCors");
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                app.UseCors("DevOpen");
             }
-            else
-                app.UseCors("DevOpen");
 
             app.UseHttpsRedirection();
             app.UseAuthentication();
