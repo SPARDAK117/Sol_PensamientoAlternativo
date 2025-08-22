@@ -33,18 +33,18 @@ namespace API_PensamientoAlternativo
 
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("CorsPolicy", policy =>
-                {
-                    policy
-                        .WithOrigins(allowedOrigins)
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .WithHeaders("Content-Type", "Authorization", "X-Custom-Header")
-                        .WithExposedHeaders("Content-Disposition") 
-                        .AllowCredentials();                       
-                });
+                //options.AddPolicy("CorsPolicy", policy =>
+                //{
+                //    policy
+                //        .WithOrigins(allowedOrigins)
+                //        .AllowAnyMethod()
+                //        .AllowAnyHeader()
+                //        .WithHeaders("Content-Type", "Authorization", "X-Custom-Header")
+                //        .WithExposedHeaders("Content-Disposition") 
+                //        .AllowCredentials();                       
+                //});
 
-                // Política abierta SOLO para DEV (no usar en prod si hay credenciales)
+                //// Política abierta SOLO para DEV (no usar en prod si hay credenciales)
                 options.AddPolicy("DevOpen", policy =>
                     policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
@@ -96,7 +96,7 @@ namespace API_PensamientoAlternativo
                 app.UseCors("DevOpen");
             }
             else
-                app.UseCors("CorsPolicy");
+                app.UseCors("DevOpen");
 
             app.UseHttpsRedirection();
             app.UseAuthentication();
