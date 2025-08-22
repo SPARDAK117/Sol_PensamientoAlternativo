@@ -36,12 +36,12 @@ namespace API_PensamientoAlternativo
                 options.AddPolicy("CorsPolicy", policy =>
                 {
                     policy
-                        .WithOrigins(allowedOrigins)              // <-- usa orígenes explícitos
-                        .SetIsOriginAllowedToAllowWildcardSubdomains() // opcional *.midominio.com
+                        .WithOrigins(allowedOrigins)
                         .AllowAnyMethod()
                         .AllowAnyHeader()
-                        .WithExposedHeaders("Content-Disposition") // si descargas archivos
-                        .AllowCredentials();                        // <-- si usas cookies/JWT en fetch
+                        .WithHeaders("Content-Type", "Authorization", "X-Custom-Header")
+                        .WithExposedHeaders("Content-Disposition") 
+                        .AllowCredentials();                       
                 });
 
                 // Política abierta SOLO para DEV (no usar en prod si hay credenciales)

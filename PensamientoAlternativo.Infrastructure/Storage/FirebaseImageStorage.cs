@@ -1,13 +1,9 @@
 ﻿using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
+using Google.Apis.Storage.v1;
 using Microsoft.Extensions.Configuration;
 using PensamientoAlternativo.Application.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PensamientoAlternativo.Infrastructure.Storage
 {
@@ -18,40 +14,69 @@ namespace PensamientoAlternativo.Infrastructure.Storage
 
         public FirebaseImageStorage(IConfiguration cfg)
         {
-            // appsettings.json
-            // "Firebase": { "ServiceAccountJsonPath": "C:\\keys\\firebase-sa.json", "Bucket": "pensamiento-alternativo-17.appspot.com" }
-            var saPath = cfg["Firebase:ServiceAccountJsonPath"];
-            _bucket = cfg["Firebase:Bucket"] ?? throw new InvalidOperationException("Firebase:Bucket requerido.");
+            // Bucket requerido (usa appsettings o env var "Firebase__Bucket")
+            _bucket = cfg["Firebase:Bucket"]
+                ?? throw new InvalidOperationException("Firebase:Bucket requerido (ej. 'pensamiento-alternativo-17.appspot.com').");
 
-            GoogleCredential credential = string.IsNullOrWhiteSpace(saPath)
-                ? GoogleCredential.GetApplicationDefault()
-                : GoogleCredential.FromFile(saPath);
+            // Soporta 4 formas de credenciales, en este orden:
+            // 1) ServiceAccountJsonBase64
+            // 2) ServiceAccountJson (JSON literal)
+            // 3) ServiceAccountJsonPath (ruta a archivo)
+            // 4) Application Default Credentials (GOOGLE_APPLICATION_CREDENTIALS)
+            var saPath = cfg["Firebase:ServiceAccountJsonPath"];      // opcional
+            var saJson = cfg["Firebase:ServiceAccountJson"];          // opcional
+            var saJson64 = cfg["Firebase:ServiceAccountJsonBase64"];    // opcional
 
-            _client = StorageClient.Create(credential);
+            GoogleCredential cred;
+
+            if (!string.IsNullOrWhiteSpace(saJson64))
+            {
+                var json = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(saJson64));
+                cred = GoogleCredential.FromJson(json);
+            }
+            else if (!string.IsNullOrWhiteSpace(saJson) && saJson.TrimStart().StartsWith("{"))
+            {
+                // Si el JSON viene con \n escapados, no pasa nada aquí
+                cred = GoogleCredential.FromJson(saJson);
+            }
+            else if (!string.IsNullOrWhiteSpace(saPath))
+            {
+                if (Directory.Exists(saPath))
+                    throw new InvalidOperationException($"Firebase:ServiceAccountJsonPath apunta a un directorio, no a un archivo: {saPath}");
+                if (!File.Exists(saPath))
+                    throw new FileNotFoundException($"No se encontró el Service Account en: {saPath}");
+                cred = GoogleCredential.FromFile(saPath);
+            }
+            else
+            {
+                // Prod (Render): usa GOOGLE_APPLICATION_CREDENTIALS=/etc/secrets/firebase-sa.json
+                cred = GoogleCredential.GetApplicationDefault();
+            }
+
+            // Asegura los scopes si el tipo de credencial lo requiere
+            if (cred.IsCreateScopedRequired)
+                cred = cred.CreateScoped(StorageService.Scope.DevstorageFullControl);
+
+            _client = StorageClient.Create(cred);
         }
 
-        public async Task<(string storagePath, string publicUrl, string objectName)> 
-            UploadAsync(Stream content,
-                        string contentType,
-                        string objectName,
-                        CancellationToken ct)
+        public async Task<(string storagePath, string publicUrl, string objectName)>
+            UploadAsync(Stream content, string contentType, string objectName, CancellationToken ct)
         {
             // Token de descarga tipo Firebase
             var downloadToken = Guid.NewGuid().ToString();
 
-            // En este overload, ContentType se pone en el Object
             var obj = new Google.Apis.Storage.v1.Data.Object
             {
                 Bucket = _bucket,
                 Name = objectName,
-                ContentType = contentType, // <-- AQUÍ
+                ContentType = contentType,
                 Metadata = new Dictionary<string, string>
                 {
                     ["firebaseStorageDownloadTokens"] = downloadToken
                 }
             };
 
-            // No intentes pasar ContentType en UploadObjectOptions: no existe esa propiedad
             await _client.UploadObjectAsync(obj, content, cancellationToken: ct);
 
             var storagePath = $"gs://{_bucket}/{objectName}";
@@ -69,11 +94,11 @@ namespace PensamientoAlternativo.Infrastructure.Storage
             }
             catch (Google.GoogleApiException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
             {
-                // Idempotente: si no existe en el bucket, lo consideramos eliminado
+                // idempotente: lo consideramos borrado
             }
         }
 
-        // ====== NUEVO: DELETE por URL pública ======
+        // DELETE por URL pública (Firebase o GCS)
         public async Task DeleteByPublicUrlAsync(string publicUrl, CancellationToken ct)
         {
             var objectName = TryGetObjectNameFromPublicUrl(publicUrl)
@@ -81,16 +106,13 @@ namespace PensamientoAlternativo.Infrastructure.Storage
             await DeleteAsync(objectName, ct);
         }
 
-        // ====== NUEVO: helper para extraer objectName desde URLs Firebase/Storage ======
         public string? TryGetObjectNameFromPublicUrl(string publicUrl)
         {
             if (string.IsNullOrWhiteSpace(publicUrl)) return null;
             if (!Uri.TryCreate(publicUrl, UriKind.Absolute, out var uri)) return null;
 
-            // Caso típico Firebase:
-            // https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{ENCODED_OBJECT}?alt=media&token=...
+            // Firebase: https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{ENCODED_OBJECT}?...
             var segs = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-            // Esperamos: [v0, b, {bucket}, o, {encoded-object}]
             if (segs.Length >= 5 &&
                 segs[0].Equals("v0", StringComparison.OrdinalIgnoreCase) &&
                 segs[1].Equals("b", StringComparison.OrdinalIgnoreCase) &&
@@ -100,16 +122,13 @@ namespace PensamientoAlternativo.Infrastructure.Storage
                 return Uri.UnescapeDataString(encoded);
             }
 
-            // Alternativa GCS pública:
-            // https://storage.googleapis.com/{bucket}/{objectName}
+            // GCS público: https://storage.googleapis.com/{bucket}/{object...}
             if (uri.Host.Equals("storage.googleapis.com", StringComparison.OrdinalIgnoreCase))
             {
                 var parts = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-                // Esperamos: [{bucket}, {object...}]
                 if (parts.Length >= 2 && string.Equals(parts[0], _bucket, StringComparison.Ordinal))
                 {
-                    var objectParts = parts.Skip(1);
-                    var obj = string.Join('/', objectParts);
+                    var obj = string.Join('/', parts.Skip(1));
                     return Uri.UnescapeDataString(obj);
                 }
             }
@@ -117,5 +136,4 @@ namespace PensamientoAlternativo.Infrastructure.Storage
             return null;
         }
     }
-
 }
