@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace API_PensamientoAlternativo.Controllers
 {
-    [EnableCors("CorsPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class ContactController : ControllerBase

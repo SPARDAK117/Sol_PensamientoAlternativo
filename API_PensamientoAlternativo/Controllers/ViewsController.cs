@@ -6,7 +6,6 @@ using PensamientoAlternativo.Application.Querys;
 
 namespace API_PensamientoAlternativo.Controllers
 {
-    [EnableCors("CorsPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class ViewsController : ControllerBase

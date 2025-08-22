@@ -11,7 +11,6 @@ using PensamientoAlternativo.Persistance.Repositories;
 
 namespace API_PensamientoAlternativo.Controllers
 {
-    [EnableCors("CorsPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class BlogController : ControllerBase

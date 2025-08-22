@@ -8,7 +8,6 @@ using PensamientoAlternativo.Domain.Entities.Sections;
 
 namespace API_PensamientoAlternativo.Controllers
 {
-    [EnableCors("CorsPolicy")]
     [ApiController]
     [Route("api/videos")]
     public class VideosController : ControllerBase

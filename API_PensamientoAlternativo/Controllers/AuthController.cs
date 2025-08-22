@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API_PensamientoAlternativo.Controllers
 {
-    [EnableCors("CorsPolicy")]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
