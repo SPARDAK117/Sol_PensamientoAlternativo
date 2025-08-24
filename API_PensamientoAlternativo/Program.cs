@@ -1,5 +1,6 @@
 ﻿using Domain.Seedwork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PensamientoAlternativo.Application.Commands.FormCommand;
@@ -27,31 +28,45 @@ namespace API_PensamientoAlternativo
             var builder = WebApplication.CreateBuilder(args);
 
 
-            //builder.Services.AddAuthentication(options =>
-            //{
-            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //})
-            //.AddJwtBearer(options =>
-            //{
-            //    var config = builder.Configuration;
-            //    options.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuer = true,
-            //        ValidateAudience = true,
-            //        ValidateLifetime = true,
-            //        ValidateIssuerSigningKey = true,
-            //        ValidIssuer = config["Jwt:Issuer"],
-            //        ValidAudience = config["Jwt:Audience"],
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!))
-            //    };
-            //});
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                var config = builder.Configuration;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = config["Jwt:Issuer"],
+                    ValidAudience = config["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!))
+                };
+            });
+
             builder.Services.AddCors(o => o.AddPolicy("AllowAllOrigins", builder =>
             {
                 builder.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader();
             }));
+
+            builder.Services.Configure<FormOptions>(o =>
+            {
+                o.MultipartBodyLengthLimit = 600L * 1024 * 1024; // 600 MB
+                                                                 // opcionalmente:
+                                                                 // o.MultipartHeadersLengthLimit = 64 * 1024;
+                                                                 // o.ValueLengthLimit = int.MaxValue;
+            });
+
+            builder.WebHost.ConfigureKestrel(o =>
+            {
+                o.Limits.MaxRequestBodySize = 600L * 1024 * 1024; // 600 MB
+            });
 
             builder.Services.AddControllers();
 

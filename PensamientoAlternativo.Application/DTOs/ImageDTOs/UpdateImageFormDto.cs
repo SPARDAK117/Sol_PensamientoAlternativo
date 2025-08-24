@@ -12,7 +12,7 @@ namespace PensamientoAlternativo.Application.DTOs.ImageDTOs
         public string? Title { get; set; }
         public string? Description { get; set; }
         public bool? IsBannerImage { get; set; }
-        public bool? IsActive { get; set; }
+        public bool? IsVisible { get; set; }
         public IFormFile? File { get; set; }
     }
 }

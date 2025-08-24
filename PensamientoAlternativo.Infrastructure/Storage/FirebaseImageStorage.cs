@@ -14,18 +14,12 @@ namespace PensamientoAlternativo.Infrastructure.Storage
 
         public FirebaseImageStorage(IConfiguration cfg)
         {
-            // Bucket requerido (usa appsettings o env var "Firebase__Bucket")
             _bucket = cfg["Firebase:Bucket"]
                 ?? throw new InvalidOperationException("Firebase:Bucket requerido (ej. 'pensamiento-alternativo-17.appspot.com').");
 
-            // Soporta 4 formas de credenciales, en este orden:
-            // 1) ServiceAccountJsonBase64
-            // 2) ServiceAccountJson (JSON literal)
-            // 3) ServiceAccountJsonPath (ruta a archivo)
-            // 4) Application Default Credentials (GOOGLE_APPLICATION_CREDENTIALS)
-            var saPath = cfg["Firebase:ServiceAccountJsonPath"];      // opcional
-            var saJson = cfg["Firebase:ServiceAccountJson"];          // opcional
-            var saJson64 = cfg["Firebase:ServiceAccountJsonBase64"];    // opcional
+            var saPath = cfg["Firebase:ServiceAccountJsonPath"];      
+            var saJson = cfg["Firebase:ServiceAccountJson"];          
+            var saJson64 = cfg["Firebase:ServiceAccountJsonBase64"];   
 
             GoogleCredential cred;
 
@@ -49,11 +43,9 @@ namespace PensamientoAlternativo.Infrastructure.Storage
             }
             else
             {
-                // Prod (Render): usa GOOGLE_APPLICATION_CREDENTIALS=/etc/secrets/firebase-sa.json
                 cred = GoogleCredential.GetApplicationDefault();
             }
 
-            // Asegura los scopes si el tipo de credencial lo requiere
             if (cred.IsCreateScopedRequired)
                 cred = cred.CreateScoped(StorageService.Scope.DevstorageFullControl);
 
@@ -63,7 +55,6 @@ namespace PensamientoAlternativo.Infrastructure.Storage
         public async Task<(string storagePath, string publicUrl, string objectName)>
             UploadAsync(Stream content, string contentType, string objectName, CancellationToken ct)
         {
-            // Token de descarga tipo Firebase
             var downloadToken = Guid.NewGuid().ToString();
 
             var obj = new Google.Apis.Storage.v1.Data.Object
@@ -98,7 +89,6 @@ namespace PensamientoAlternativo.Infrastructure.Storage
             }
         }
 
-        // DELETE por URL pública (Firebase o GCS)
         public async Task DeleteByPublicUrlAsync(string publicUrl, CancellationToken ct)
         {
             var objectName = TryGetObjectNameFromPublicUrl(publicUrl)

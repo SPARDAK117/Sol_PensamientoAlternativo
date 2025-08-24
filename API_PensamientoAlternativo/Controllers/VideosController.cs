@@ -31,7 +31,9 @@ namespace API_PensamientoAlternativo.Controllers
         }
 
         [HttpPost("createVideoPost")]
-        [RequestSizeLimit(500_000_000)] // 500 MB
+        [DisableRequestSizeLimit]
+        [RequestSizeLimit(600_000_000)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 600_000_000)]
         public async Task<IActionResult> CreateVideoPost([FromForm] CreateVideoFormDto form, CancellationToken ct)
         {
             if (form.File is null || form.File.Length == 0)
@@ -39,7 +41,10 @@ namespace API_PensamientoAlternativo.Controllers
             if (!form.File.ContentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
                 return BadRequest("Solo se permiten archivos de video.");
 
-            await using var stream = form.File.OpenReadStream();
+            await using var stream = form.File is null
+                ? null
+                : form.File.OpenReadStream();
+
 
             var id = await _mediator.Send(new CreateVideoCommand(
                 form.Title,
@@ -55,7 +60,7 @@ namespace API_PensamientoAlternativo.Controllers
         }
 
         [HttpPatch("patchVideoPostbyId/{id:int}")]
-        [RequestSizeLimit(500_000_000)]
+        [DisableRequestSizeLimit]
         public async Task<IActionResult> PatchVideoPost([FromRoute] int id, [FromForm] UpdateVideoFormDto form, CancellationToken ct)
         {
             await using var stream = form.File is null ? null : form.File.OpenReadStream();

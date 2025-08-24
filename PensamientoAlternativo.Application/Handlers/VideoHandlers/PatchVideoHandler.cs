@@ -25,7 +25,7 @@ namespace PensamientoAlternativo.Application.Handlers.VideoHandlers
         {
             var v = await _repo.GetByIdAsync(req.Id, ct);
             if (v is null) return false;
-
+            string oldUrlDBName = v.Url;
             string? newUrl = null;
 
             if (req.Content is not null)
@@ -36,11 +36,11 @@ namespace PensamientoAlternativo.Application.Handlers.VideoHandlers
                 // Intenta mantener carpeta base si ya había objeto
                 var currentObj = _storage.TryGetObjectNameFromPublicUrl(v.Url);
                 var folder = "videos";
-                if (!string.IsNullOrWhiteSpace(currentObj))
-                {
-                    var lastSlash = currentObj!.LastIndexOf('/');
-                    if (lastSlash > 0) folder = currentObj[..lastSlash];
-                }
+                //if (!string.IsNullOrWhiteSpace(currentObj))
+                //{
+                //    var lastSlash = currentObj!.LastIndexOf('/');
+                //    if (lastSlash > 0) folder = currentObj[..lastSlash];
+                //}
 
                 var (name, ext) = SplitNameAndExt(req.OriginalFileName ?? "");
                 if (string.IsNullOrWhiteSpace(ext)) ext = GuessVideoExt(req.ContentType);
@@ -62,7 +62,7 @@ namespace PensamientoAlternativo.Application.Handlers.VideoHandlers
 
             if (newUrl is not null)
             {
-                var oldObj = _storage.TryGetObjectNameFromPublicUrl(v.Url);
+                var oldObj = _storage.TryGetObjectNameFromPublicUrl(oldUrlDBName);
                 if (oldObj is not null)
                 {
                     try { await _storage.DeleteAsync(oldObj, ct); } catch { /* log si quieres */ }

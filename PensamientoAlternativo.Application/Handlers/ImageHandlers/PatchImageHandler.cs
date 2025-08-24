@@ -43,12 +43,6 @@ namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
                 var folder = "fotos";
                 if (req.IsBannerImage ?? img.IsBannerImage) folder = "banners";
 
-                if (!string.IsNullOrWhiteSpace(currentObjectName))
-                {
-                    var lastSlash = currentObjectName!.LastIndexOf('/');
-                    if (lastSlash > 0) folder = currentObjectName[..lastSlash]; // conserva carpeta base previa
-                }
-
                 var (baseName, ext) = SplitNameAndExt(req.OriginalFileName ?? "");
                 if (string.IsNullOrWhiteSpace(ext))
                     ext = GuessExt(req.ContentType);
