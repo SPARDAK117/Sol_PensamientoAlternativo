@@ -1,45 +1,75 @@
 ﻿using System.Security.Cryptography;
+
 namespace PensamientoAlternativo.Application.Helpers
 {
-    public static class Bcrypt
-    {
-        public static string Hash(string plaintext, int workFactor = 12) =>
-            BCrypt.Net.BCrypt.HashPassword(plaintext, workFactor);
 
-        public static bool Verify(string plaintext, string storedHash) =>
-            BCrypt.Net.BCrypt.Verify(plaintext, storedHash);
-    }
-
-    public static class PasswordHashing
+    /// <summary>
+    /// Hasher de contraseñas con PBKDF2 (SHA-256).
+    /// Formato de almacenamiento: "{iterations}.{Base64(salt)}.{Base64(hash)}"
+    /// </summary>
+    public static class PasswordHasher
     {
-        private const int SaltSize = 16;   // 128-bit
-        private const int KeySize = 32;   // 256-bit
-        private const int Iterations = 100_000;
+        private const int SaltSize = 16;        // 128-bit
+        private const int KeySize = 32;        // 256-bit
+        private const int Iterations = 100_000; // Ajusta según políticas de seguridad
         private static readonly HashAlgorithmName Algorithm = HashAlgorithmName.SHA256;
 
-        // Para REGISTRO o seed: genera el hash a guardar en BD
+        /// <summary>
+        /// Genera el hash para guardar en base de datos.
+        /// </summary>
         public static string Hash(string password)
         {
+            if (string.IsNullOrEmpty(password))
+                throw new ArgumentException("Password is required.", nameof(password));
+
             byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
             byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations, Algorithm, KeySize);
+
             return $"{Iterations}.{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
         }
 
-        // Para LOGIN: verifica texto plano contra hash almacenado
-        public static bool Verify(string password, string hashString)
+        /// <summary>
+        /// Verifica el password en texto plano contra el hash almacenado.
+        /// </summary>
+        public static bool Verify(string password, string storedHash)
         {
-            var parts = hashString.Split('.', 3);
-            if (parts.Length != 3) return false;
+            if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(storedHash))
+                return false;
 
-            int iterations = int.Parse(parts[0]);
-            byte[] salt = Convert.FromBase64String(parts[1]);
-            byte[] hash = Convert.FromBase64String(parts[2]);
+            var parts = storedHash.Split('.', 3);
+            if (parts.Length != 3)
+                return false;
 
-            byte[] hashToCompare = Rfc2898DeriveBytes.Pbkdf2(
-                password, salt, iterations, Algorithm, hash.Length);
+            if (!int.TryParse(parts[0], out int iterations) || iterations <= 0)
+                return false;
 
+            byte[] salt;
+            byte[] hash;
+
+            try
+            {
+                salt = Convert.FromBase64String(parts[1]);
+                hash = Convert.FromBase64String(parts[2]);
+            }
+            catch
+            {
+                return false; // Formato inválido
+            }
+
+            // Deriva con los mismos parámetros y compara en tiempo constante
+            byte[] hashToCompare = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, Algorithm, hash.Length);
             return CryptographicOperations.FixedTimeEquals(hashToCompare, hash);
         }
-    }
 
+        /// <summary>
+        /// (Opcional) Indica si conviene re-hashear con más iteraciones.
+        /// Útil si subes Iterations en el futuro.
+        /// </summary>
+        public static bool NeedsRehash(string storedHash)
+        {
+            var parts = storedHash.Split('.', 3);
+            if (parts.Length != 3) return true;
+            return int.TryParse(parts[0], out int iterationsInHash) && iterationsInHash < Iterations;
+        }
+    }
 }

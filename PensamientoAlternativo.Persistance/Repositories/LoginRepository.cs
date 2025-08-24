@@ -25,6 +25,22 @@ namespace PensamientoAlternativo.Persistance.Repositories
                    .Where(u => u.UserEmail == email)
                    .Select(u => u.UserEmail.ToString())
                    .FirstOrDefaultAsync();
+        public async Task<bool> UpdatePasswordHashByEmailAsync(string email, string upgraded)
+        {
+            var user = await _db.LoginCredentials
+                                .FirstOrDefaultAsync(u => u.UserEmail == email);
+
+            if (user is null)
+                return false;
+
+            user.Password = upgraded;
+
+            _db.LoginCredentials.Update(user);
+            await _db.SaveChangesAsync();
+
+            return true;
+        }
+
     }
 
 }

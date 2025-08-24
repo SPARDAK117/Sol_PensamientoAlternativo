@@ -10,5 +10,6 @@ namespace PensamientoAlternativo.Application.Interfaces
     {
         Task<string?> GetPasswordHashByEmailAsync(string email);
         Task<string?> GetUserIdByEmailAsync(string email);
+        Task<bool> UpdatePasswordHashByEmailAsync(string email, string upgraded);
     }
 }

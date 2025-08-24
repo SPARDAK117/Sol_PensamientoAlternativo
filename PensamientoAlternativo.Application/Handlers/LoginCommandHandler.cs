@@ -24,19 +24,22 @@ namespace PensamientoAlternativo.Application.Handlers
 
         public async Task<LoginResponse?> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            // Normaliza email
-            var email = request.Email.Trim().ToLowerInvariant();
+            var email = request.Email?.Trim().ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(email)) return null;
 
-            // 1) Trae el hash guardado (bcrypt: comienza con $2a$ / $2b$ / $2y$)
             var storedHash = await _loginRepository.GetPasswordHashByEmailAsync(email);
             if (string.IsNullOrWhiteSpace(storedHash))
-                return null; // usuario no existe
+                return null;
 
-            // 2) Verifica bcrypt (compatible con crypt('..', gen_salt('bf',12)))
-            var ok = BCrypt.Net.BCrypt.Verify(request.Password, storedHash);
+            var ok = PasswordHasher.Verify(request.Password, storedHash);
             if (!ok) return null;
 
-            // 3) JWT
+            if (PasswordHasher.NeedsRehash(storedHash))
+            {
+                var upgraded = PasswordHasher.Hash(request.Password);
+                await _loginRepository.UpdatePasswordHashByEmailAsync(email, upgraded);
+            }
+
             var userId = await _loginRepository.GetUserIdByEmailAsync(email) ?? email;
             var token = _tokenGenerator.GenerateToken(email, userId);
 
