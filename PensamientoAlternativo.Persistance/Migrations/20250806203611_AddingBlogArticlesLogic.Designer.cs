@@ -198,7 +198,7 @@ namespace PensamientoAlternativo.Persistance.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Path")
+                    b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");
 

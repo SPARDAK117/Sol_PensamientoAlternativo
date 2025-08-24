@@ -13,16 +13,16 @@ namespace PensamientoAlternativo.Domain.Entities.Sections
         public int ViewSection { get; set; }
         public bool IsVisible { get; set; } = false;
         public string Title { get; private set; } = string.Empty;
-        public string Path { get; private set; } = string.Empty;
+        public string Url { get; private set; } = string.Empty;
         public string Description { get; private set; } = string.Empty;
 
-        public Image(bool isBannerImage, bool isVisible,int viewSection, string title, string path, string description)
+        public Image(bool isBannerImage, bool isVisible,int viewSection, string title, string url, string description)
         {
             IsBannerImage = isBannerImage;
             IsVisible = isVisible;
             ViewSection = viewSection;
             Title = title ?? string.Empty;
-            Path = path ?? string.Empty;
+            Url = url ?? string.Empty;
             Description = description ?? string.Empty;
         }
 
@@ -36,7 +36,7 @@ namespace PensamientoAlternativo.Domain.Entities.Sections
 
         public void SetPath(string newPublicUrl)
         {
-            Path = newPublicUrl ?? Path;
+            Url  = newPublicUrl ?? Url;
         }
     }
 

@@ -211,7 +211,7 @@ namespace PensamientoAlternativo.Persistance.Migrations
                     b.Property<bool>("IsVisible")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Path")
+                    b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");
 

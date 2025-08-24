@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PensamientoAlternativo.Domain.Entities;
+using PensamientoAlternativo.Domain.Entities.Auth;
 using PensamientoAlternativo.Domain.Entities.Blog;
 using PensamientoAlternativo.Domain.Entities.Sections;
 using System;
@@ -23,6 +24,7 @@ namespace PensamientoAlternativo.Persistance
         public DbSet<Faq> Faqs => Set<Faq>();
         public DbSet<Article> Articles => Set<Article>();
         public DbSet<BlogCategory> BlogCategories => Set<BlogCategory>();
+        public DbSet<LoginCredentials> LoginCredentials => Set<LoginCredentials>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,11 +46,14 @@ namespace PensamientoAlternativo.Persistance
                 .HasForeignKey(f => f.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<LoginCredentials>().Property(x => x.UserEmail).IsRequired();
+            modelBuilder.Entity<LoginCredentials>().Property(x => x.Password).IsRequired();
+
             modelBuilder.Entity<Image>().Property(x => x.IsBannerImage).IsRequired();
             modelBuilder.Entity<Image>().Property(x => x.IsVisible).IsRequired();
             modelBuilder.Entity<Image>().Property(x => x.ViewSection).IsRequired();
             modelBuilder.Entity<Image>().Property(x => x.Title).IsRequired();
-            modelBuilder.Entity<Image>().Property(x => x.Path).IsRequired();
+            modelBuilder.Entity<Image>().Property(i => i.Url).IsRequired();
             modelBuilder.Entity<Image>().Property(x => x.Description).IsRequired();
 
             modelBuilder.Entity<Service>().Property(x => x.IconName).IsRequired();

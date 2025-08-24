@@ -1,5 +1,7 @@
 ﻿using Domain.Seedwork;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PensamientoAlternativo.Application.Commands.FormCommand;
 using PensamientoAlternativo.Application.DTOs.CategoriesDTOs;
 using PensamientoAlternativo.Application.Handlers.CategoriesHandler;
@@ -14,6 +16,7 @@ using PensamientoAlternativo.Infrastructure.Services;
 using PensamientoAlternativo.Infrastructure.Storage;
 using PensamientoAlternativo.Persistance;
 using PensamientoAlternativo.Persistance.Repositories;
+using System.Text;
 
 namespace API_PensamientoAlternativo
 {
@@ -23,6 +26,26 @@ namespace API_PensamientoAlternativo
         {
             var builder = WebApplication.CreateBuilder(args);
 
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                var config = builder.Configuration;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = config["Jwt:Issuer"],
+                    ValidAudience = config["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!))
+                };
+            });
             builder.Services.AddCors(o => o.AddPolicy("AllowAllOrigins", builder =>
             {
                 builder.AllowAnyOrigin()
@@ -49,8 +72,8 @@ namespace API_PensamientoAlternativo
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
 
-
-
+            builder.Services.AddScoped<IJwtTokenGenerator,JwtTokenGenerator>();
+            builder.Services.AddScoped<ILoginRepository, LoginRepository>();
             builder.Services.AddScoped<IContactFormRepository, ContactFormRepository>();
             builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
             builder.Services.AddScoped<IClientSettingsRepository, ClientSettingsRepository>();
@@ -66,6 +89,7 @@ namespace API_PensamientoAlternativo
             builder.Services.AddScoped<IImageStorage, FirebaseImageStorage>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+
             var app = builder.Build();
 
             app.UseRouting();

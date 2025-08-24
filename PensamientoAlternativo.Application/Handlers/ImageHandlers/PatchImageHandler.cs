@@ -28,7 +28,7 @@ namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
             if (img is null) return false;
 
             // Guarda la URL vieja por si se reemplaza el archivo
-            var oldUrl = img.Path;
+            var oldUrl = img.Url;
 
             // 1) Si viene archivo nuevo: subir y obtener nueva URL pública
             string? newPublicUrl = null;

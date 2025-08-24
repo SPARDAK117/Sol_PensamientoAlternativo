@@ -12,8 +12,8 @@ using PensamientoAlternativo.Persistance;
 namespace PensamientoAlternativo.Persistance.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250807183732_UpdateDB")]
-    partial class UpdateDB
+    [Migration("20250823230217_LoginCredentialsTable")]
+    partial class LoginCredentialsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,27 @@ namespace PensamientoAlternativo.Persistance.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("PensamientoAlternativo.Domain.Entities.Auth.LoginCredentials", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LoginCredentials");
+                });
 
             modelBuilder.Entity("PensamientoAlternativo.Domain.Entities.Blog.BlogCategory", b =>
                 {
@@ -181,6 +202,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Question")
                         .IsRequired()
                         .HasColumnType("text");
@@ -205,6 +229,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
                     b.Property<bool>("IsBannerImage")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");
@@ -212,6 +239,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("ViewSection")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -232,6 +262,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("OpinionText")
                         .IsRequired()
@@ -286,6 +319,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsVisible")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
@@ -293,6 +329,9 @@ namespace PensamientoAlternativo.Persistance.Migrations
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("ViewSection")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

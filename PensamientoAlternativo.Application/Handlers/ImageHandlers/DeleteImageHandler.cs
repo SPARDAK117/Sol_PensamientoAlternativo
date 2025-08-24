@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using PensamientoAlternativo.Application.Commands.ImageCommands;
 using PensamientoAlternativo.Application.Interfaces;
+using PensamientoAlternativo.Domain.Entities.Sections;
 using PensamientoAlternativo.Domain.Interfaces;
 
 namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
@@ -19,13 +20,11 @@ namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
 
         public async Task<bool> Handle(DeleteImageCommand request, CancellationToken ct)
         {
-            var img = await _repo.GetByIdAsync(request.Id, ct);
+            Image img = await _repo.GetByIdAsync(request.Id, ct);
             if (img is null) return false;
 
-            // 1) Borra del bucket (si falla, no borres DB para poder reintentar)
-            await _storage.DeleteByPublicUrlAsync(img.Path, ct);
+            await _storage.DeleteByPublicUrlAsync(img.Url, ct);
 
-            // 2) Borra el registro en DB
             return await _repo.DeleteAsync(request.Id, ct);
         }
     }

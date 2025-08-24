@@ -202,7 +202,7 @@ namespace PensamientoAlternativo.Persistance.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Path")
+                    b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");
 

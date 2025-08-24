@@ -44,9 +44,10 @@ namespace API_PensamientoAlternativo.Controllers
             var list = items.Select(i => new {
                 i.Id,
                 i.Title,
-                Url = i.Path,
+                Url = i.Url,   
                 i.IsBannerImage,
-                i.IsVisible
+                i.IsVisible,
+                i.Description
             });
             return Ok(list);
         }

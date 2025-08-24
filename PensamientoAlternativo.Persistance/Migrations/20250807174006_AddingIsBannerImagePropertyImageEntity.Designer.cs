@@ -205,7 +205,7 @@ namespace PensamientoAlternativo.Persistance.Migrations
                     b.Property<bool>("IsBannerImage")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Path")
+                    b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");
 
