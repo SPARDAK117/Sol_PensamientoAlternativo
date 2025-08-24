@@ -361,3 +361,41 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# --- Seguridad: evita subir secretos/llaves ---
+# Archivos de servicio de GCP/Firebase (ajusta el patrón a tus nombres reales)
+*.serviceAccount*.json
+*firebase*.json
+*credentials*.json
+*.key.json
+*.gcloud.json
+
+# Certificados/llaves adicionales
+*.cer
+*.crt
+*.pem
+*.key
+*.p12
+
+# Archivos .env locales
+.env
+.env.*
+!.env.example
+
+# AppSettings locales con secretos (mantén los "normales" versionados)
+appsettings.*.Local.json
+
+# --- IDEs adicionales / tooling ---
+.vscode/
+.idea/
+
+# --- Bases de datos locales (si usas SQLite/LiteDB) ---
+*.sqlite
+*.sqlite3
+*.db
+
+# --- Salidas estáticas/Uploads generados por la app (ajusta rutas reales) ---
+wwwroot/uploads/
+wwwroot/media/
+wwwroot/videos/
+wwwroot/images/
