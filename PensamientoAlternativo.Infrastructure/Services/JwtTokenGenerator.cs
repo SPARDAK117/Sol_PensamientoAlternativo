@@ -11,40 +11,39 @@ using System.Threading.Tasks;
 
 namespace PensamientoAlternativo.Infrastructure.Services
 {
-    public class JwtTokenGenerator : IJwtTokenGenerator
+    public sealed class JwtTokenGenerator : IJwtTokenGenerator
     {
-        private readonly IConfiguration _configuration;
-
-        public JwtTokenGenerator(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+        private readonly IConfiguration _cfg;
+        public JwtTokenGenerator(IConfiguration cfg) => _cfg = cfg;
 
         public string GenerateToken(string email, string userId)
         {
-            string? secretKey = _configuration["Jwt:Key"];
-            string? issuer = _configuration["Jwt:Issuer"];
-            string? audience = _configuration["Jwt:Audience"];
+            var issuer = _cfg["Jwt:Issuer"]!;
+            var audience = _cfg["Jwt:Audience"]!;
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_cfg["Jwt:Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var minutes = int.Parse(_cfg["Jwt:ExpiresMinutes"] ?? "60");
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
+            var claims = new List<Claim>
+        {
             new Claim(JwtRegisteredClaimNames.Sub, userId),
             new Claim(JwtRegisteredClaimNames.Email, email),
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(ClaimTypes.Email, email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
             var token = new JwtSecurityToken(
-                issuer,
-                audience,
-                claims,
-                expires: DateTime.UtcNow.AddHours(1),
-                signingCredentials: credentials
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                notBefore: DateTime.UtcNow,
+                expires: DateTime.UtcNow.AddMinutes(minutes),
+                signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
+
 }

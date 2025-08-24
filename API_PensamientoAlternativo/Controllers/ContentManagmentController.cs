@@ -1,5 +1,6 @@
 ﻿using Domain.Seedwork;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using PensamientoAlternativo.Application.Commands;
@@ -15,6 +16,7 @@ using PensamientoAlternativo.Domain.Entities.Sections;
 
 namespace API_PensamientoAlternativo.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ContentManagmentController : ControllerBase

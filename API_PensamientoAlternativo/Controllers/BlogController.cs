@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,8 +12,10 @@ using PensamientoAlternativo.Persistance.Repositories;
 
 namespace API_PensamientoAlternativo.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
+
     public class BlogController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -20,12 +23,14 @@ namespace API_PensamientoAlternativo.Controllers
         {
             _mediator = mediator;
         }
+        [AllowAnonymous]
         [HttpGet("Articlelist")]
         public async Task<IActionResult> GetArticleList([FromQuery] int page = 1, [FromQuery] int pageSize = 8, [FromQuery] string? category = null)
         {
             var result = await _mediator.Send(new GetBlogArticleListQuery(page, pageSize, category));
             return Ok(result);
         }
+        [AllowAnonymous]
         [HttpGet("getArticleById/{id}")]
         public async Task<IActionResult> GetBlogArticleById(int id)
         {

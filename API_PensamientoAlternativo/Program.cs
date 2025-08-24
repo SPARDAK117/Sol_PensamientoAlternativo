@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using PensamientoAlternativo.Application.Commands.FormCommand;
 using PensamientoAlternativo.Application.DTOs.CategoriesDTOs;
 using PensamientoAlternativo.Application.Handlers.CategoriesHandler;
@@ -17,6 +18,7 @@ using PensamientoAlternativo.Infrastructure.Services;
 using PensamientoAlternativo.Infrastructure.Storage;
 using PensamientoAlternativo.Persistance;
 using PensamientoAlternativo.Persistance.Repositories;
+using System.Security.Claims;
 using System.Text;
 
 namespace API_PensamientoAlternativo
@@ -28,25 +30,47 @@ namespace API_PensamientoAlternativo
             var builder = WebApplication.CreateBuilder(args);
 
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                var config = builder.Configuration;
-                options.TokenValidationParameters = new TokenValidationParameters
+            builder.Services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = config["Jwt:Issuer"],
-                    ValidAudience = config["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!))
-                };
-            });
+                    var cfg = builder.Configuration;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = cfg["Jwt:Issuer"],
+                        ValidAudience = cfg["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:Key"]!)),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                    options.RequireHttpsMetadata = false; // útil en dev si pegas por http
+                    options.SaveToken = true;
+
+                    // LOG para diagnóstico de 401
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnAuthenticationFailed = ctx =>
+                        {
+                            Console.WriteLine("JWT FAILED: " + ctx.Exception.Message);
+                            return Task.CompletedTask;
+                        },
+                        OnChallenge = ctx =>
+                        {
+                            Console.WriteLine($"JWT CHALLENGE: err={ctx.Error} desc={ctx.ErrorDescription}");
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = ctx =>
+                        {
+                            Console.WriteLine("JWT OK for: " + ctx.Principal?.FindFirst(ClaimTypes.Email)?.Value);
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+
+            builder.Services.AddAuthorization();
 
             builder.Services.AddCors(o => o.AddPolicy("AllowAllOrigins", builder =>
             {
@@ -68,6 +92,33 @@ namespace API_PensamientoAlternativo
                 o.Limits.MaxRequestBodySize = 600L * 1024 * 1024; // 600 MB
             });
 
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "PA API", Version = "v1" });
+
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Description = "JWT en el header. Ej: Bearer {token}",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer", 
+                    BearerFormat = "JWT",
+                    Reference = new OpenApiReference 
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                };
+
+                c.AddSecurityDefinition("Bearer", securityScheme);
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { securityScheme, Array.Empty<string>() }
+                });
+            });
             builder.Services.AddControllers();
 
             builder.Services.AddEndpointsApiExplorer();

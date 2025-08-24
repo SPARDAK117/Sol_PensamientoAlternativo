@@ -1,5 +1,6 @@
 ﻿using Domain.Seedwork;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using PensamientoAlternativo.Application.Commands.VideoCommands;
@@ -8,6 +9,7 @@ using PensamientoAlternativo.Domain.Entities.Sections;
 
 namespace API_PensamientoAlternativo.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/videos")]
     public class VideosController : ControllerBase

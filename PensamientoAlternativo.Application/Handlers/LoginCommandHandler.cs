@@ -24,10 +24,10 @@ namespace PensamientoAlternativo.Application.Handlers
 
         public async Task<LoginResponse?> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            var email = request.Email?.Trim().ToLowerInvariant();
+            string email = request.Email?.Trim().ToLowerInvariant() ?? "";
             if (string.IsNullOrWhiteSpace(email)) return null;
 
-            var storedHash = await _loginRepository.GetPasswordHashByEmailAsync(email);
+            string storedHash = await _loginRepository.GetPasswordHashByEmailAsync(email) ?? "";
             if (string.IsNullOrWhiteSpace(storedHash))
                 return null;
 
@@ -40,8 +40,8 @@ namespace PensamientoAlternativo.Application.Handlers
                 await _loginRepository.UpdatePasswordHashByEmailAsync(email, upgraded);
             }
 
-            var userId = await _loginRepository.GetUserIdByEmailAsync(email) ?? email;
-            var token = _tokenGenerator.GenerateToken(email, userId);
+            string userId = await _loginRepository.GetUserIdByEmailAsync(email) ?? email;
+            string token = _tokenGenerator.GenerateToken(email, userId);
 
             return new LoginResponse { Token = token };
         }

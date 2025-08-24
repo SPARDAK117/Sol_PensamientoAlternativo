@@ -23,7 +23,7 @@ namespace PensamientoAlternativo.Persistance.Repositories
         public async Task<string?> GetUserIdByEmailAsync(string email)
             => await _db.LoginCredentials
                    .Where(u => u.UserEmail == email)
-                   .Select(u => u.UserEmail.ToString())
+                   .Select(u => u.Id.ToString())
                    .FirstOrDefaultAsync();
         public async Task<bool> UpdatePasswordHashByEmailAsync(string email, string upgraded)
         {
