@@ -12,7 +12,7 @@ using PensamientoAlternativo.Persistance.Repositories;
 
 namespace API_PensamientoAlternativo.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
 

@@ -16,7 +16,7 @@ using PensamientoAlternativo.Domain.Entities.Sections;
 
 namespace API_PensamientoAlternativo.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ContentManagmentController : ControllerBase
@@ -49,7 +49,8 @@ namespace API_PensamientoAlternativo.Controllers
                 Url = i.Url,   
                 i.IsBannerImage,
                 i.IsVisible,
-                i.Description
+                i.Description,
+                i.ViewSection
             });
             return Ok(list);
         }
@@ -156,7 +157,8 @@ namespace API_PensamientoAlternativo.Controllers
                 o.AuthorName,
                 o.StarRate,
                 o.OpinionText,
-                o.CreatedDate
+                o.CreatedDate,
+                o.IsVisible
             });
 
             return Ok(new

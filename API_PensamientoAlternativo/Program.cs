@@ -30,47 +30,47 @@ namespace API_PensamientoAlternativo
             var builder = WebApplication.CreateBuilder(args);
 
 
-            builder.Services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    var cfg = builder.Configuration;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = cfg["Jwt:Issuer"],
-                        ValidAudience = cfg["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:Key"]!)),
-                        ClockSkew = TimeSpan.Zero
-                    };
-                    options.RequireHttpsMetadata = false; // útil en dev si pegas por http
-                    options.SaveToken = true;
+            //builder.Services
+            //.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //.AddJwtBearer(options =>
+            //{
+            //    var cfg = builder.Configuration;
+            //    options.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateIssuer = true,
+            //        ValidateAudience = true,
+            //        ValidateLifetime = true,
+            //        ValidateIssuerSigningKey = true,
+            //        ValidIssuer = cfg["Jwt:Issuer"],
+            //        ValidAudience = cfg["Jwt:Audience"],
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:Key"]!)),
+            //        ClockSkew = TimeSpan.Zero
+            //    };
+            //    options.RequireHttpsMetadata = false; // útil en dev si pegas por http
+            //    options.SaveToken = true;
 
-                    // LOG para diagnóstico de 401
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnAuthenticationFailed = ctx =>
-                        {
-                            Console.WriteLine("JWT FAILED: " + ctx.Exception.Message);
-                            return Task.CompletedTask;
-                        },
-                        OnChallenge = ctx =>
-                        {
-                            Console.WriteLine($"JWT CHALLENGE: err={ctx.Error} desc={ctx.ErrorDescription}");
-                            return Task.CompletedTask;
-                        },
-                        OnTokenValidated = ctx =>
-                        {
-                            Console.WriteLine("JWT OK for: " + ctx.Principal?.FindFirst(ClaimTypes.Email)?.Value);
-                            return Task.CompletedTask;
-                        }
-                    };
-                });
+            //    // LOG para diagnóstico de 401
+            //    options.Events = new JwtBearerEvents
+            //    {
+            //        OnAuthenticationFailed = ctx =>
+            //        {
+            //            Console.WriteLine("JWT FAILED: " + ctx.Exception.Message);
+            //            return Task.CompletedTask;
+            //        },
+            //        OnChallenge = ctx =>
+            //        {
+            //            Console.WriteLine($"JWT CHALLENGE: err={ctx.Error} desc={ctx.ErrorDescription}");
+            //            return Task.CompletedTask;
+            //        },
+            //        OnTokenValidated = ctx =>
+            //        {
+            //            Console.WriteLine("JWT OK for: " + ctx.Principal?.FindFirst(ClaimTypes.Email)?.Value);
+            //            return Task.CompletedTask;
+            //        }
+            //    };
+            //});
 
-            builder.Services.AddAuthorization();
+            //builder.Services.AddAuthorization();
 
             builder.Services.AddCors(o => o.AddPolicy("AllowAllOrigins", builder =>
             {
@@ -93,32 +93,32 @@ namespace API_PensamientoAlternativo
             });
 
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new() { Title = "PA API", Version = "v1" });
+            //builder.Services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new() { Title = "PA API", Version = "v1" });
 
-                var securityScheme = new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Description = "JWT en el header. Ej: Bearer {token}",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer", 
-                    BearerFormat = "JWT",
-                    Reference = new OpenApiReference 
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                };
+            //    var securityScheme = new OpenApiSecurityScheme
+            //    {
+            //        Name = "Authorization",
+            //        Description = "JWT en el header. Ej: Bearer {token}",
+            //        In = ParameterLocation.Header,
+            //        Type = SecuritySchemeType.Http,
+            //        Scheme = "bearer", 
+            //        BearerFormat = "JWT",
+            //        Reference = new OpenApiReference 
+            //        {
+            //            Type = ReferenceType.SecurityScheme,
+            //            Id = "Bearer"
+            //        }
+            //    };
 
-                c.AddSecurityDefinition("Bearer", securityScheme);
+            //    c.AddSecurityDefinition("Bearer", securityScheme);
 
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    { securityScheme, Array.Empty<string>() }
-                });
-            });
+            //    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            //    {
+            //        { securityScheme, Array.Empty<string>() }
+            //    });
+            //});
             builder.Services.AddControllers();
 
             builder.Services.AddEndpointsApiExplorer();
