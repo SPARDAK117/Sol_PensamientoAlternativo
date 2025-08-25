@@ -16,7 +16,7 @@ namespace PensamientoAlternativo.Domain.Entities.Sections
         public bool IsVisible { get; private set; } = false;
 
 
-        private Opinion() { }
+        public Opinion() { }
 
         public Opinion(string authorName, DateTime createdDate, int starRate, string opinion,bool isVisible)
         {
@@ -31,7 +31,7 @@ namespace PensamientoAlternativo.Domain.Entities.Sections
             if (authorName is not null) AuthorName = authorName.Trim();
             if (starRate is not null) StarRate = starRate.Value;     
             if (opinionText is not null) OpinionText = opinionText.Trim();
-            if (isVisible) IsVisible = isVisible;
+            IsVisible = isVisible;
         }
     }
 

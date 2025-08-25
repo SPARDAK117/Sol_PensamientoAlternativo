@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using PensamientoAlternativo.Application.Commands.OpinionsCommands;
+using PensamientoAlternativo.Domain.Entities.Sections;
 using PensamientoAlternativo.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace PensamientoAlternativo.Application.Handlers.OpinionsHandlers
 
         public async Task<bool> Handle(PatchOpinionCommand req, CancellationToken ct)
         {
-            var op = await _repo.GetByIdAsync(req.Id, ct);
+            Opinion op = await _repo.GetByIdAsync(req.Id, ct);
             if (op is null) return false;
 
             // Validaciones ya pasaron por FluentValidation

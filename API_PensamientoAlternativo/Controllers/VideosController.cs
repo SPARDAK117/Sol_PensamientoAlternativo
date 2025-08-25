@@ -9,7 +9,7 @@ using PensamientoAlternativo.Domain.Entities.Sections;
 
 namespace API_PensamientoAlternativo.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/videos")]
     public class VideosController : ControllerBase
