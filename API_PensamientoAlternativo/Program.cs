@@ -13,6 +13,7 @@ using PensamientoAlternativo.Application.Handlers.OpinionsHandlers;
 using PensamientoAlternativo.Application.Handlers.VideoHandlers;
 using PensamientoAlternativo.Application.Interfaces;
 using PensamientoAlternativo.Domain.Interfaces;
+using PensamientoAlternativo.Domain.SeedWork;
 using PensamientoAlternativo.Infrastructure;
 using PensamientoAlternativo.Infrastructure.Services;
 using PensamientoAlternativo.Infrastructure.Storage;
@@ -155,7 +156,7 @@ namespace API_PensamientoAlternativo
             builder.Services.AddScoped<IImageStorage, FirebaseImageStorage>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-
+            builder.Services.AddScoped(typeof(IWriteRepository<>), typeof(WriteRepository<>));
             var app = builder.Build();
 
             app.UseRouting();

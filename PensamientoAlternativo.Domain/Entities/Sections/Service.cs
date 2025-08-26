@@ -9,12 +9,12 @@ namespace PensamientoAlternativo.Domain.Entities.Sections;
 
 public class Service : Entity
 {
-    public string IconName { get; private set; } = string.Empty;
-    public string IconPath { get; private set; } = string.Empty;
-    public string Title { get; private set; } = string.Empty;
-    public string Subtitle { get; private set; } = string.Empty;
+    public string IconName { get;  set; } = string.Empty;
+    public string IconPath { get;  set; } = string.Empty;
+    public string Title { get;  set; } = string.Empty;
+    public string Subtitle { get;  set; } = string.Empty;
 
-    private Service() { }
+    public Service() { }
 
     public Service(string iconName, string iconPath, string title, string subtitle)
     {
@@ -22,6 +22,15 @@ public class Service : Entity
         IconPath = iconPath;
         Title = title;
         Subtitle = subtitle;
+    }
+
+    public void UpdateMetadata(string title, string subtitle, string iconPath, string iconName)
+    {
+        if(!string.IsNullOrEmpty(title)) Title = title.Trim();
+        if (!string.IsNullOrEmpty(subtitle)) Subtitle = subtitle.Trim();
+        if (!string.IsNullOrEmpty(iconPath)) IconName = iconName.Trim();
+        if (!string.IsNullOrEmpty(iconName)) IconPath = iconPath.Trim();
+
     }
 }
 
