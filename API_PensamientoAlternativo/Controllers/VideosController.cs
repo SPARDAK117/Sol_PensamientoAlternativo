@@ -28,7 +28,7 @@ namespace API_PensamientoAlternativo.Controllers
         {
             var total = await _readRepo.CountAsync(ct);
             var items = await _readRepo.GetPageAsync(page, pageSize, ct);
-            var list = items.Select(v => new { v.Id, v.Title, v.Description, v.Url, v.IsVisible });
+            var list = items.Select(v => new { v.Id, v.Title, v.Description, v.Url, v.IsVisible,v.ViewSection });
             return Ok(new { items = list, total, page, pageSize });
         }
 
