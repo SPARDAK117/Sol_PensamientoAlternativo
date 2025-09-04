@@ -10,6 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
+using Image = SixLabors.ImageSharp.Image;
+
 
 namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
 {
@@ -33,24 +38,25 @@ namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
             // 1) Derivar carpeta según reglas del servidor
             var folder = req.IsBannerImage ? "banners" : "fotos";
 
-            // 2) Generar nombre único y limpio
-            var (name, ext) = SplitNameAndExt(req.OriginalFileName);
-            if (string.IsNullOrWhiteSpace(ext))
-                ext = GuessExt(req.ContentType); // opcional: infiere extensión si falta
-
+            // 2) Nombre único y limpio (usaremos .webp)
+            var (name, _) = SplitNameAndExt(req.OriginalFileName);
             var slug = Slugify(!string.IsNullOrWhiteSpace(req.Title) ? req.Title : name);
-            var unique = Guid.NewGuid().ToString("N"); // evita colisiones
+            var unique = Guid.NewGuid().ToString("N");
+            var ext = ".webp"; // <-- forzamos .webp
             var objectName = $"{folder}/{DateTime.UtcNow:yyyy/MM}/{unique}-{slug}{ext}";
 
-            // 3) Subir a Firebase Storage (crea token y devuelve URL pública)
+            // 3) Convertir SIEMPRE a WebP (lossy con calidad 80)
+            await using var webpStream = await ToWebpStreamAsync(req.Content, quality: 80, ct);
+
+            // 4) Subir a Firebase como image/webp
             var (_, publicUrl, _) = await _storage.UploadAsync(
-                content: req.Content,
-                contentType: req.ContentType,
+                content: webpStream,
+                contentType: "image/webp",          // <-- importante
                 objectName: objectName,
                 ct: ct);
 
             // 4) Guardar en DB la URL pública (lista para el front)
-            Image image = new (
+            var image = new Domain.Entities.Sections.Image(
                 isBannerImage: req.IsBannerImage,
                 isVisible: req.IsVisible,
                 viewSection: req.ViewSection,
@@ -78,13 +84,28 @@ namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
             return string.IsNullOrWhiteSpace(s) ? "image" : s;
         }
 
-        private static string GuessExt(string contentType) => contentType.ToLowerInvariant() switch
+        private static string GuessExt(string contentType) => ".webp";
+
+        private static async Task<MemoryStream> ToWebpStreamAsync(Stream input, int quality, CancellationToken ct)
         {
-            "image/jpeg" or "image/jpg" => ".jpg",
-            "image/png" => ".png",
-            "image/webp" => ".webp",
-            "image/gif" => ".gif",
-            _ => "" // si no sabes, deja sin extensión
-        };
+            // Copiamos a memoria en caso de streams no seekeables
+            using var originalBuffer = new MemoryStream();
+            await input.CopyToAsync(originalBuffer, ct);
+            originalBuffer.Position = 0;
+
+            using var image = await Image.LoadAsync(originalBuffer, ct);
+            image.Mutate(x => x.AutoOrient()); // respeta EXIF/rotación
+
+            var output = new MemoryStream();
+            var encoder = new WebpEncoder
+            {
+                Quality = quality,                    // 0..100
+                FileFormat = WebpFileFormatType.Lossy // Lossy recomendado para fotos; usa Lossless si prefieres PNG-like
+            };
+
+            await image.SaveAsync(output, encoder, ct);
+            output.Position = 0;
+            return output; // caller hace await using
+        }
     }
 }

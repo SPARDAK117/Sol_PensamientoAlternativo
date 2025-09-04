@@ -2,6 +2,9 @@
 using PensamientoAlternativo.Application.Commands.ImageCommands;
 using PensamientoAlternativo.Application.Interfaces;
 using PensamientoAlternativo.Domain.Interfaces;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,25 +37,27 @@ namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
             string? newPublicUrl = null;
             if (req.Content is not null)
             {
+                // Validación mínima
                 if (string.IsNullOrWhiteSpace(req.ContentType))
                     throw new ArgumentException("ContentType requerido cuando se envía archivo.");
+                if (!req.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                    throw new ArgumentException("El archivo debe ser de tipo imagen.");
 
-                // Derivar carpeta a partir del objeto actual (si podemos) para mantener orden;
-                // si no, usa 'fotos' / 'banners' según el flag actual* o futuro (preferimos el nuevo si viene).
-                var currentObjectName = _storage.TryGetObjectNameFromPublicUrl(oldUrl);
-                var folder = "fotos";
-                if (req.IsBannerImage ?? img.IsBannerImage) folder = "banners";
+                // Carpeta según banner actual o nuevo
+                var folder = (req.IsBannerImage ?? img.IsBannerImage) ? "banners" : "fotos";
 
-                var (baseName, ext) = SplitNameAndExt(req.OriginalFileName ?? "");
-                if (string.IsNullOrWhiteSpace(ext))
-                    ext = GuessExt(req.ContentType);
+                // Nombre base/slug; siempre forzamos extensión .webp
+                var (baseName, _) = SplitNameAndExt(req.OriginalFileName ?? "");
                 var slug = Slugify(!string.IsNullOrWhiteSpace(req.Title) ? req.Title! : baseName);
                 var unique = Guid.NewGuid().ToString("N");
-                var objectName = $"{folder}/{DateTime.UtcNow:yyyy/MM}/{unique}-{slug}{ext}".Trim('/');
+                var objectName = $"{folder}/{DateTime.UtcNow:yyyy/MM}/{unique}-{slug}.webp".Trim('/');
+
+                // Convertir SIEMPRE a WebP (lossy calidad 80; puedes ajustar)
+                await using var webpStream = await ToWebpStreamAsync(req.Content, quality: 80, ct);
 
                 var (_, publicUrl, _) = await _storage.UploadAsync(
-                    content: req.Content,
-                    contentType: req.ContentType!,
+                    content: webpStream,
+                    contentType: "image/webp", 
                     objectName: objectName,
                     ct: ct);
 
@@ -102,5 +107,26 @@ namespace PensamientoAlternativo.Application.Handlers.ImageHandlers
             "image/gif" => ".gif",
             _ => ""  // si no sabemos, omitimos
         };
+
+        private static async Task<MemoryStream> ToWebpStreamAsync(Stream input, int quality, CancellationToken ct)
+        {
+            using var originalBuffer = new MemoryStream();
+            await input.CopyToAsync(originalBuffer, ct);
+            originalBuffer.Position = 0;
+
+            using var image = await Image.LoadAsync(originalBuffer, ct);
+            image.Mutate(x => x.AutoOrient()); // respeta EXIF (fotos móviles)
+
+            var output = new MemoryStream();
+            var encoder = new WebpEncoder
+            {
+                Quality = quality,                    // 0..100 (80 suele ser buen balance)
+                FileFormat = WebpFileFormatType.Lossy // usa Lossless para logos/PNG-like
+            };
+
+            await image.SaveAsync(output, encoder, ct);
+            output.Position = 0;
+            return output;
+        }
     }
 }
