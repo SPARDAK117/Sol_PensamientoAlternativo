@@ -38,6 +38,7 @@ namespace PensamientoAlternativo.Application.Handlers.OpinionsHandlers
                 {
                     customer = new Customer(req.AuthorName, req.Email, req.EmailNotifications, req.AcceptTermsAndConditions);
                     await _customerRepository.AddAsync(customer);
+                    await _customerRepository.SaveAsync();
                 }
             }
 

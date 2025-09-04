@@ -8,6 +8,7 @@ namespace Domain.Seedwork
         Task<List<T>> GetAllAsync(CancellationToken ct = default);
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
         Task AddAsync(T entity);
+        Task AddAsync(T entity,CancellationToken cancellationToken);
         Task RemoveAsync(T entity);
         Task SaveAsync();
         Task<List<T>> GetPageAsync(int page, int pageSize, CancellationToken ct = default);

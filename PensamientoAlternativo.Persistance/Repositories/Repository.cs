@@ -29,10 +29,14 @@ public abstract class Repository<T> : IRepository<T> where T : Entity
     {
         return await _context.Set<T>().Where(predicate).ToListAsync();
     }
-
     public virtual async Task AddAsync(T entity)
     {
         await _context.Set<T>().AddAsync(entity);
+    }
+    public virtual async Task AddAsync(T entity,CancellationToken cancellationToken)
+    {
+        await _context.Set<T>().AddAsync(entity);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public virtual async Task RemoveAsync(T entity)
