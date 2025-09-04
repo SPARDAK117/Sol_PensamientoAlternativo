@@ -173,7 +173,7 @@ namespace API_PensamientoAlternativo.Controllers
         [HttpPost("Opinions/createOpinion")]
         public async Task<IActionResult> CreateOpinion([FromBody] CreateOpinionRequest body, CancellationToken ct)
         {
-            var id = await _mediator.Send(new CreateOpinionCommand(body.AuthorName, body.StarRate, body.OpinionText,body.IsVisible), ct);
+            var id = await _mediator.Send(new CreateOpinionCommand(body.AuthorName,body.Email, body.StarRate, body.OpinionText, body.OpinionText2, body.OpinionText3,body.IsVisible,body.AcceptTermsAndConditions,body.EmailNotifications), ct);
             return Ok(new { id }); // o 201 si prefieres
         }
 

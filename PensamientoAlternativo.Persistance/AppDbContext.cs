@@ -32,6 +32,8 @@ namespace PensamientoAlternativo.Persistance
             {
                 entity.Property(c => c.Name).IsRequired();
                 entity.Property(c => c.Email).IsRequired().HasMaxLength(100);
+                entity.Property(c => c.IsEmailNotificationsAvailable).IsRequired();
+                entity.Property(c => c.AcceptTermsAndConditions).IsRequired();
             });
 
             modelBuilder.Entity<ContactForm>(entity =>
@@ -42,6 +44,12 @@ namespace PensamientoAlternativo.Persistance
 
             modelBuilder.Entity<Customer>()
                 .HasMany(c => c.ContactForms)
+                .WithOne(f => f.Customer)
+                .HasForeignKey(f => f.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Customer>()
+                .HasMany(c => c.Opinions)
                 .WithOne(f => f.Customer)
                 .HasForeignKey(f => f.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);

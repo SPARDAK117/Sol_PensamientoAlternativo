@@ -13,18 +13,32 @@ namespace PensamientoAlternativo.Domain.Entities.Sections
         public DateTime CreatedDate { get; private set; }
         public int StarRate { get; private set; }
         public string OpinionText { get; private set; } = string.Empty;
+        public string OpinionText2 { get; private set; } = string.Empty;
+        public string OpinionText3 { get; private set; } = string.Empty;
         public bool IsVisible { get; private set; } = false;
 
+        public int CustomerId { get; private set; }
+
+        public Customer Customer { get; private set; } = null!;
 
         public Opinion() { }
 
-        public Opinion(string authorName, DateTime createdDate, int starRate, string opinion,bool isVisible)
+        public Opinion(string authorName, DateTime createdDate, int starRate, string opinion, string opinion2, string opinion3,bool isVisible)
         {
             AuthorName = authorName;
             CreatedDate = createdDate;
             StarRate = starRate;
             OpinionText = opinion;
             IsVisible = isVisible;
+            OpinionText2 = opinion2;
+            OpinionText3 = opinion3;
+        }
+
+        public Opinion(Customer customer, string message)
+        {
+            Customer = customer;
+            CustomerId = customer.Id;
+            OpinionText = message;
         }
         public void Update(string? authorName, int? starRate, string? opinionText,bool isVisible)
         {
