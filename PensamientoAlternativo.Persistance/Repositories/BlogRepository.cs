@@ -97,6 +97,7 @@ namespace PensamientoAlternativo.Persistance.Repositories
                 {
                     Id = x.Id,
                     Title = x.Title,
+                    Description = x.Description,
                     ImageUrl = x.ImageUrl,
                     AuthorName = x.AuthorName,
                     CreatedDate = x.CreatedDate,
