@@ -17,7 +17,7 @@ namespace PensamientoAlternativo.Domain.Entities.Sections
         public string OpinionText3 { get; private set; } = string.Empty;
         public bool IsVisible { get; private set; } = false;
 
-        public int CustomerId { get; private set; }
+        public int CustomerId { get; set; }
 
         public Customer Customer { get; private set; } = null!;
 
@@ -25,6 +25,18 @@ namespace PensamientoAlternativo.Domain.Entities.Sections
 
         public Opinion(string authorName, DateTime createdDate, int starRate, string opinion, string opinion2, string opinion3,bool isVisible)
         {
+            AuthorName = authorName;
+            CreatedDate = createdDate;
+            StarRate = starRate;
+            OpinionText = opinion;
+            IsVisible = isVisible;
+            OpinionText2 = opinion2;
+            OpinionText3 = opinion3;
+        }
+
+        public Opinion(int id,string authorName, DateTime createdDate, int starRate, string opinion, string opinion2, string opinion3, bool isVisible)
+        {
+            Id = id;
             AuthorName = authorName;
             CreatedDate = createdDate;
             StarRate = starRate;

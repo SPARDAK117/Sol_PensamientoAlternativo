@@ -158,7 +158,9 @@ namespace API_PensamientoAlternativo.Controllers
                 o.StarRate,
                 o.OpinionText,
                 o.CreatedDate,
-                o.IsVisible
+                o.IsVisible,
+                o.OpinionText2,
+                o.OpinionText3
             });
 
             return Ok(new

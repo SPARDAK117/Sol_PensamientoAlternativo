@@ -75,7 +75,9 @@ namespace PensamientoAlternativo.Persistance
             modelBuilder.Entity<Video>().Property(x => x.IsVisible).IsRequired();
             modelBuilder.Entity<Video>().Property(x => x.ViewSection).IsRequired();
 
-
+            modelBuilder.Entity<Opinion>()
+    .Property(x => x.Id)
+    .ValueGeneratedOnAdd();
             modelBuilder.Entity<Opinion>().Property(x => x.AuthorName).IsRequired();
             modelBuilder.Entity<Opinion>().Property(x => x.StarRate).IsRequired();
             modelBuilder.Entity<Opinion>().Property(x => x.OpinionText).IsRequired();

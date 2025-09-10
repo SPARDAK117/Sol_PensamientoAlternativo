@@ -13,5 +13,7 @@ namespace PensamientoAlternativo.Domain.Interfaces
         Task<Opinion?> GetByIdAsync(int id, CancellationToken ct);
         Task UpdateAsync(Opinion opinion, CancellationToken ct);
         Task<bool> DeleteAsync(int id, CancellationToken ct);
+
+        Task<int> GetMaxIdAsync(CancellationToken ct);
     }
 }

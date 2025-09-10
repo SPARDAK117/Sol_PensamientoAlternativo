@@ -20,7 +20,12 @@ namespace PensamientoAlternativo.Application.Handlers.OpinionsHandlers
 
         public async Task<int> Handle(CreateOpinionCommand req, CancellationToken cancellationToken)
         {
+            int lastId = await _repo.GetMaxIdAsync(cancellationToken);
+            int newId = lastId + 1;
+
+
             var op = new Opinion(
+                id: newId,
                 authorName: req.AuthorName.Trim(),
                 createdDate: DateTime.UtcNow,
                 starRate: req.StarRate,
@@ -40,6 +45,8 @@ namespace PensamientoAlternativo.Application.Handlers.OpinionsHandlers
                     await _customerRepository.AddAsync(customer);
                     await _customerRepository.SaveAsync();
                 }
+
+                op.CustomerId = customer.Id;
             }
 
             return await _repo.CreateAsync(op, cancellationToken);

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Domain.Seedwork;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using PensamientoAlternativo.Domain.Entities.Sections;
 using PensamientoAlternativo.Domain.Interfaces;
 using System;
@@ -12,15 +14,24 @@ namespace PensamientoAlternativo.Persistance.Repositories
     public sealed class OpinionWriteRepository : IOpinionWriteRepository
     {
         private readonly AppDbContext _db;
-        public OpinionWriteRepository(AppDbContext db) => _db = db;
+        public OpinionWriteRepository(AppDbContext db) 
+        {
+            _db = db;
+            
+        }
 
         public async Task<int> CreateAsync(Opinion opinion, CancellationToken ct)
-        {
+        { 
             _db.Opinions.Add(opinion);
             await _db.SaveChangesAsync(ct);
             return opinion.Id;
         }
-
+        public async Task<int> GetMaxIdAsync(CancellationToken ct)
+        {
+            return await _db.Opinions.AnyAsync(ct)
+                ? await _db.Opinions.MaxAsync(o => o.Id, ct)
+                : 0;
+        }
         public Task<Opinion?> GetByIdAsync(int id, CancellationToken ct) =>
             _db.Opinions.FirstOrDefaultAsync(x => x.Id == id, ct);
 
